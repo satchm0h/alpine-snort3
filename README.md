@@ -1,9 +1,12 @@
 # alpine-snort3
 
-<span style="display:block;text-align:center">
-![Snort 3 Logo](https://www.snort.org/assets/Snort3.png)
-[snort.org/snort3](https://snort.org/snort3)
-</span>
+<p align="center">
+  <img height="200" src="https://www.dropbox.com/s/0q7h9z5kjm9x194/Snort3.png?dl=1"/>
+  <br/>
+  <a href="snort.org/snort3">
+    <span style='font-size: x-large;'>snort.org/snort3</span>
+  </a>
+</p>
 
 ## Alpine Linux Snort 3 Runtime
 
