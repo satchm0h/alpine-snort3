@@ -1,7 +1,7 @@
 # alpine-snort3
 
 <p align="center">
-  <img height="200" src="https://www.dropbox.com/s/0q7h9z5kjm9x194/Snort3.png?dl=1"/>
+  <img height="200" src="https://www.dropbox.com/s/0q7h9z5kjm9x194/Snort3.png?raw=1"/>
   <br/>
   <a href="snort.org/snort3">
     <span style='font-size: x-large;'>snort.org/snort3</span>
