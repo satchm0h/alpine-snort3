@@ -26,7 +26,7 @@ This image is intentionally basic. It is intended to provide a clean (thin-ish) 
 
 The Dockerfile leverages a multi-stage build from the Snort3 source in order to build a minimally sized base container upon which you can add your own special sauce
 
-If you are looking for an image to hack on the Snort 3 source code, [go check out Xiche's dockerhub repositories](https://hub.docker.com/u/xiche). He's got coverage for a number of linux distros.
+If you are looking for an image to hack on the Snort 3 source code, go check out [Xiche's dockerhub repositories](https://hub.docker.com/u/xiche). He has built functional dev environments for a number of popular distros.
 
 ### To Do
 
