@@ -3,7 +3,7 @@
 # (Note that this is a multi-phase Dockerfile)
 # To build run `docker build --rm -t tebedwel/snort3-alpine:latest`
 #
-FROM alpine:latest as builder
+FROM alpine:3.8 as builder
 
 ENV PREFIX_DIR=/usr/local
 ENV HOME=/root
@@ -12,12 +12,11 @@ ENV HOME=/root
 RUN echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
 
 # Prep APK for installing packages
-RUN apk update
-RUN apk upgrade
+RUN apk update && \
+    apk upgrade
 
 # BUILD DEPENDENCIES:
 RUN apk add --no-cache \
-    # Build Tools
     wget \
     build-base \
     git \
@@ -29,31 +28,44 @@ RUN apk add --no-cache \
     cpputest \
     # Libraries
     flatbuffers-dev@testing \
-    hwloc-dev@testing \
     libdnet-dev \
     libpcap-dev \
     libtirpc-dev \
     luajit-dev \
-    openssl-dev \
+    libressl-dev \
+    zlib-dev \
     pcre-dev \
     libuuid \
     xz-dev
 
+# One of the quirks of alpine is that unistd.h is in /usr/include. Lots of
+# software looks for it in /usr/include/linux or /usr/include/sys.
+# So, we'll make symlinks
+RUN mkdir /usr/include/linux && \
+    ln -s /usr/include/unistd.h /usr/include/linux/unistd.h && \
+    ln -s /usr/include/unistd.h /usr/include/sys/unistd.h
+
+# The Alpine hwloc on testing is not reliable from a build perspective.
+# So, lets just build it ourselves.
+#
+WORKDIR $HOME
+RUN wget https://download.open-mpi.org/release/hwloc/v2.0/hwloc-2.0.3.tar.gz &&\
+    tar zxvf hwloc-2.0.3.tar.gz
+WORKDIR $HOME/hwloc-2.0.3
+RUN ./configure --prefix=${PREFIX_DIR} && \
+    make && \
+    make install
+
 # BUILD Daq on alpine:
-# Note that this is the old DAQ and will eventually be replaced w/
-# DAQ-NG. Please pardon the sed hack for Alpine compilation
+# Note that this is the old DAQ and will eventually be replaced w/ DAQ-NG
 
 WORKDIR $HOME
 RUN wget https://snort.org/downloads/snortplus/daq-2.2.2.tar.gz
 RUN tar zxvf daq-2.2.2.tar.gz
 WORKDIR $HOME/daq-2.2.2
 
-# Hack around compiler errors in daq on Alpine
-RUN find . -name '*.c' -exec sed -i -e 's/sys\/unistd\.h/unistd\.h/g' {} \;
-
 # BUILD daq
-RUN ./configure --prefix=${PREFIX_DIR} && make
-RUN make install
+RUN ./configure --prefix=${PREFIX_DIR} && make && make install
 
 
 # BUILD Snort on alpine
@@ -61,12 +73,16 @@ WORKDIR $HOME
 RUN git clone https://github.com/snort3/snort3.git
 
 WORKDIR $HOME/snort3
-RUN ./configure_cmake.sh --prefix=${PREFIX_DIR}
+RUN ./configure_cmake.sh \
+    --prefix=${PREFIX_DIR} \
+    --enable-unit-tests \
+    --disable-docs
 
 
 WORKDIR $HOME/snort3/build
 RUN make VERBOSE=1
-RUN make install
+RUN make check && \
+    make install
 
 #
 # RUNTIME CONTAINER
@@ -84,17 +100,18 @@ RUN apk update
 RUN apk upgrade
 
 # RUNTIME DEPENDENCIES:
-RUN apk add --no-cache hwloc@testing \
+RUN apk add --no-cache  \
     flatbuffers@testing \
     libdnet \
     luajit \
-    openssl \
+    libressl \
     libpcap \
     pcre \
     libtirpc \
     musl \
     libstdc++ \
     libuuid \
+    zlib \
     xz
 
 # Copy the build artifacts from the build container to the runtime file system

@@ -8,6 +8,11 @@
   </a>
 </p>
 
+[![Docker Stars](https://img.shields.io/docker/stars/satchm0h/alpine-snort3.svg?style=flat-square)](https://hub.docker.com/r/satchm0h/alpine-snort3/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/satchm0h/alpine-snort3.svg?style=flat-square)](https://hub.docker.com/r/satchm0h/alpine-snort3/)
+Image Download Size:
+[![](https://images.microbadger.com/badges/image/satchm0h/alpine-snort3.svg)](http://microbadger.com/images/satchm0h/alpine-snort3 'Get your own image badge on microbadger.com')
+
 ## Alpine Linux Snort 3 Runtime
 
 ### TL;DR
@@ -27,6 +32,12 @@ This image is intentionally basic. It is intended to provide a clean (thin-ish) 
 The Dockerfile leverages a multi-stage build from the Snort3 source in order to build a minimally sized base container upon which you can add your own special sauce
 
 If you are looking for an image to hack on the Snort 3 source code, go check out [Xiche's dockerhub repositories](https://hub.docker.com/u/xiche). He has built functional dev environments for a number of popular distros.
+
+### Obligatory Alpine Caveats
+
+As Alpine Linux uses musl, you may run into some issues with environments expecting glibc-like behavior – especially if you try to use binaries compiled with glibc. You should recompile these binaries to use musl (compiling on Alpine is probably the easiest way to do this).
+
+Note that Alpine 3.8 has shifted from OpenSSL to LibreSSL.
 
 ### To Do
 
