@@ -26,8 +26,10 @@ RUN apk add --no-cache \
     lcov@testing \
     cppcheck \
     cpputest \
+    autoconf \
+    automake \
+    libtool \
     # Libraries
-    flatbuffers-dev@testing \
     libdnet-dev \
     libpcap-dev \
     libtirpc-dev \
@@ -57,15 +59,13 @@ RUN ./configure --prefix=${PREFIX_DIR} && \
     make install
 
 # BUILD Daq on alpine:
-# Note that this is the old DAQ and will eventually be replaced w/ DAQ-NG
 
 WORKDIR $HOME
-RUN wget https://snort.org/downloads/snortplus/daq-2.2.2.tar.gz
-RUN tar zxvf daq-2.2.2.tar.gz
-WORKDIR $HOME/daq-2.2.2
-
-# BUILD daq
-RUN ./configure --prefix=${PREFIX_DIR} && make && make install
+RUN git clone https://github.com/snort3/libdaq.git
+WORKDIR $HOME/libdaq
+RUN ./bootstrap && \
+    ./configure --prefix=${PREFIX_DIR} && make && \
+    make install
 
 
 # BUILD Snort on alpine
@@ -87,13 +87,10 @@ RUN make check && \
 #
 # RUNTIME CONTAINER
 #
-FROM alpine:latest
+FROM alpine:3.8
 
 ENV PREFIX_DIR=/usr/local/
 WORKDIR ${PREFIX_DIR}
-
-# Update APK adding the @testing repo for hwloc (as of Alpine v3.7)
-RUN echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
 
 # Prep APK for installing packages
 RUN apk update
@@ -101,7 +98,6 @@ RUN apk upgrade
 
 # RUNTIME DEPENDENCIES:
 RUN apk add --no-cache  \
-    flatbuffers@testing \
     libdnet \
     luajit \
     libressl \
